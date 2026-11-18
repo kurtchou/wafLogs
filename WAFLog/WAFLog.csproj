@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK" Version="2.3.55.2" />
+    <PackageReference Include="AWSSDK.Athena" Version="4.1.1.1" />
+    <PackageReference Include="AWSSDK.Core" Version="4.1.1.1" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.1.0.2" />
+    <PackageReference Include="Google.GenAI" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
   </ItemGroup>
 
