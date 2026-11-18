@@ -1,23 +1,33 @@
+using Amazon.Athena;
+using WAFLog.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// Register AWS Athena SDK (reads AWS:Region from appsettings.json; uses EC2 IAM Role in prod)
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonAthena>();
+
+// Register Athena Query Service
+builder.Services.AddScoped<IAthenaQueryService, AthenaQueryService>();
+
+// Allow Next.js frontend server
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("NextJsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Add your internal Next.js server URL here later
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
 app.UseHttpsRedirection();
-
+app.UseCors("NextJsPolicy");
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
