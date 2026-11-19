@@ -11,6 +11,7 @@ builder.Services.AddAWSService<IAmazonAthena>();
 
 // Register Athena Query Service
 builder.Services.AddScoped<IAthenaQueryService, AthenaQueryService>();
+builder.Services.AddScoped<IGeminiWafAnalyzerService, GeminiWafAnalyzerService>();
 
 // Allow Next.js frontend server
 builder.Services.AddCors(options =>

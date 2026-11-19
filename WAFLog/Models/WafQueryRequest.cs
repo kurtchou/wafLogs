@@ -29,3 +29,18 @@ public class WafLogSummaryRow
     public string UserAgent { get; set; } = string.Empty;
     public long RequestCount { get; set; }
 }
+
+public class WafAnalyzeRequest : WafQueryRequest
+{
+    // Optional custom question from the user in the UI, e.g. "Are any of these IPs legitimate internal testers?"
+    public string? CustomPrompt { get; set; }
+}
+
+public class WafAnalyzeResponse
+{
+    public string GeneratedAtTaipei { get; set; } = string.Empty;
+    public int TotalUniquePatterns { get; set; }
+    public long TotalRequestsAnalyzed { get; set; }
+    public string AiSummaryMarkdown { get; set; } = string.Empty;
+    public List<WafLogSummaryRow> Logs { get; set; } = new();
+}
