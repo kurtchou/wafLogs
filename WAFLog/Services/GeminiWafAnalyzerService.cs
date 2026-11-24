@@ -58,6 +58,7 @@ Analyze the JSON log summary below and respond in clean, scannable Markdown with
 2. **Top Source IPs & Behavioral Patterns** (Identify automated scanners, path probing like `/huiwan/ipcheck.aspx`, credential stuffing, or false-positive internal/cloud IPs such as AWS/LINE/Taiwan ISP ranges)
 3. **Targeted Endpoints & Rules** (Which URIs and `TerminatingRuleId` rules are seeing the most hits)
 4. **Recommended Actions** (Concrete WAF rule tuning, IP allowlisting, or rate-based rule adjustments)
+5. **Replay in traditional chinese (zh-TW)
 
 Aggregated WAF Logs (JSON):
 {serializedLogs}";

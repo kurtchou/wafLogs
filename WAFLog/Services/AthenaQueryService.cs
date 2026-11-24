@@ -27,6 +27,9 @@ public class AthenaQueryService : IAthenaQueryService
 
     public async Task<List<WafLogSummaryRow>> QueryWafLogsAsync(WafQueryRequest request, CancellationToken ct = default)
     {
+        if (request.Actions is not { Count: > 0 })
+            throw new ArgumentException("At least one action is required.", nameof(request.Actions));
+
         var database = _config["Athena:Database"] ?? "default";
         var tableName = _config["Athena:TableName"] ?? "waf_logs_uat";
         var outputLocation = _config["Athena:OutputLocation"]
@@ -39,7 +42,7 @@ public class AthenaQueryService : IAthenaQueryService
         var startDate = request.StartDate ?? endDate.AddDays(-7);
         var limit = Math.Clamp(request.Limit, 1, 500);
 
-        var sql = BuildAggregatedSql(tableName, startDate, endDate, request.WebAclNames, request.Action, request.ClientIp, limit);
+        var sql = BuildAggregatedSql(tableName, startDate, endDate, request.WebAclNames, request.Actions, request.ClientIp, limit);
         _logger.LogInformation("Executing Athena WAF query: {Sql}", sql);
 
         var startResponse = await _athena.StartQueryExecutionAsync(new StartQueryExecutionRequest
@@ -90,7 +93,7 @@ public class AthenaQueryService : IAthenaQueryService
         DateTime startDate,
         DateTime endDate,
         List<string>? webAclNames,
-        string? action,
+        List<string>? actions,
         string? clientIp,
         int limit)
     {
@@ -113,10 +116,14 @@ public class AthenaQueryService : IAthenaQueryService
                 whereClauses.Add($"webacl_name IN ({escapedList})");
         }
 
-        if (!string.IsNullOrWhiteSpace(action))
+        if (actions is { Count: > 0 })
         {
-            var safeAction = action.Trim().ToUpperInvariant().Replace("'", "");
-            whereClauses.Add($"action = '{safeAction}'");
+            var escapedActions = string.Join(", ", actions
+                .Where(a => !string.IsNullOrWhiteSpace(a))
+                .Select(a => $"'{a.Trim().ToUpperInvariant().Replace("'", "")}'"));
+
+            if (!string.IsNullOrEmpty(escapedActions))
+                whereClauses.Add($"action IN ({escapedActions})");
         }
 
         if (!string.IsNullOrWhiteSpace(clientIp))
@@ -198,8 +205,9 @@ public class AthenaQueryService : IAthenaQueryService
         string tableName,
         DateTime startUtc,
         DateTime endUtc,
-        string? action,
+        List<string>? actions,
         string? clientIp,
+        string? clientIp1,
         int limit)
     {
         // Partition projection filter: 'yyyy/MM/dd/HH' dramatically reduces S3 scan cost
@@ -212,10 +220,14 @@ public class AthenaQueryService : IAthenaQueryService
             $"datehour <= '{endPartition}'"
         };
 
-        if (!string.IsNullOrWhiteSpace(action))
+        if (actions is { Count: > 0 })
         {
-            var safeAction = action.Trim().ToUpperInvariant().Replace("'", "");
-            whereClauses.Add($"action = '{safeAction}'");
+            var escapedActions = string.Join(", ", actions
+                .Where(a => !string.IsNullOrWhiteSpace(a))
+                .Select(a => $"'{a.Trim().ToUpperInvariant().Replace("'", "")}'"));
+
+            if (!string.IsNullOrEmpty(escapedActions))
+                whereClauses.Add($"action IN ({escapedActions})");
         }
 
         if (!string.IsNullOrWhiteSpace(clientIp))

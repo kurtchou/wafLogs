@@ -9,8 +9,9 @@ public class WafQueryRequest
     // Optional WebACL filter, e.g. ["CreatedByCloudFront-dd96c183"]
     public List<string>? WebAclNames { get; set; }
 
+    public List<string>? Actions { get; set; }
     // Optional filters: "BLOCK", "ALLOW", "COUNT", or null for all
-    public string? Action { get; set; }
+    // 
     public string? ClientIp { get; set; }
     public int Limit { get; set; } = 100;
 }
@@ -34,6 +35,7 @@ public class WafAnalyzeRequest : WafQueryRequest
 {
     // Optional custom question from the user in the UI, e.g. "Are any of these IPs legitimate internal testers?"
     public string? CustomPrompt { get; set; }
+    public List<WafLogSummaryRow>? Logs { get; set; }
 }
 
 public class WafAnalyzeResponse
